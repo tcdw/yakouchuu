@@ -1,0 +1,75 @@
+; ========================== METADATA ==========================
+$XX $YY $ZZ	;  INIT ECHO ($XX: DELAY, $YY: FEEDBACK, $ZZ: FIR)
+		;
+		;  FIR LIST:
+		;  $7F $00 $00 $00 $00 $00 $00 $00 
+		;  $58 $BF $DB $F0 $FE $07 $0C $0C 
+		;  $0C $21 $2B $2B $13 $FE $F3 $F9 
+		;  $34 $33 $00 $D9 $E5 $01 $FC $EB
+
+$NO $DA $SR $TT $tt	;  (LIST) SAME AS N-SPC BUT NO GAIN
+
+; ========================== SEQUENCE ==========================
+
+$XX $YY		;  NORMAL NOTE (NOTE: $XX <= $56, DELAY: $YY)
+		;  $55: REST
+		;  $56: TIE
+		;  $57+: GLITCH?
+
+$E0 $XX		;  SET INSTRUMENT
+
+$E1 $XX		;  PANPOT (R: $0A)
+		;
+		;  $14: RIGHT
+		;  $0A: MIDDLE
+		;  $00: LEFT
+		; +$80: REVERSE L
+		; +$40: REVERSE R
+
+$E2 $XX $YY
+
+$E3 $XX $YY	; VIBRATO (DEPTH: $YY, RATE: $xx, DELAY: $yy, $XX: $xx + $yy * $10)
+
+$E4
+
+$E5 $XX		; GLOBAL VOL ($XX)
+
+$E6 $XX $YY
+
+$E7 $XX		; TEMPO ($XX)
+
+$E8 $XX $YY
+
+$E9 $XX
+
+$EA $XX
+
+$EB $XX $YY
+
+$EC $XX $YY
+
+$ED $XX $YY	; LOCAL VOLUME (UNUSED?: $XX, V: $YY)
+
+$EE $XX $YY
+
+$EF
+
+$F0 $XX $YY	; PORTAMENTO (DELAY: $XX, SPEED (SIGNED BYTE): $YY)
+
+$F1 $XX $YY 	; ECHO VOL (L: $XX, R: $YY)
+
+$F2 $XX		; ECHO ENABLED (BITWISE)
+
+$F3 $XX $YY $ZZ
+
+$F4 $XX $YY	; RATE BEFORE NOTE CUT (WITH $FA: $XX, NORMAL: $YY)
+
+$F9 $XX $YY	; SLUR NOTE (MUST AFTER NORMAL NOTE) (NOTE: $XX, DELAY: $YY)
+
+$FA $XX $YY	; NOTE USING ALT CUT RATE (NOTE: $XX, DELAY: $YY)
+
+$FB		; LOOP START
+
+$FC $XX $YY	; JUMP ($YYXX)
+
+$FE $XX 	; LOOP STOP ($XX TIMES)
