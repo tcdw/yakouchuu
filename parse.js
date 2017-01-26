@@ -1,7 +1,7 @@
 #!/usr/bin/env nodejs
 
 var fs = require('fs');
-var chunk = fs.readFileSync("knm-08.spc"); // zna-25 ykc-b06
+var chunk = fs.readFileSync("ykc-b06.spc"); // zna-25 ykc-b06
 var entryAddr = 0x1CAB;
 var note = "C C# D D# E F F# G G# A A# B".split(" ");
 var smw = true;
@@ -57,6 +57,7 @@ shownote = function (n) {
 
 VCMDsetInstrument = function (index, inst) {
     trace("[" + index + "] Instrument, Patch " + inst);
+    smwl("PATCH" + inst + " ");
 }
 
 VCMDpanpot = function (index, pan) {
@@ -77,6 +78,11 @@ VCMDpanpot = function (index, pan) {
         pan2 = pan;
     }
     trace("[" + index + "] Panpot, Balance: " + (pan2 - 10) + (reserveL ? ", Reserved L" : "") + (reserveR ? ", Reserved R" : ""));
+    if (pan < 16) {
+        smwl("$DB $0" + pan.toString(16));
+    } else {
+        smwl("$DB $" + pan.toString(16));
+    }
 }
 
 VCMDvibrato = function (index, arg1, arg2) {
