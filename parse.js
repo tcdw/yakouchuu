@@ -1,7 +1,7 @@
 #!/usr/bin/env nodejs
 
 var fs = require('fs');
-var chunk = fs.readFileSync("ykc-b06.spc"); // zna-25 ykc-b06
+var chunk = fs.readFileSync("knm-08.spc"); // zna-25 ykc-b06
 var entryAddr = 0x1CAB;
 var note = "C C# D D# E F F# G G# A A# B".split(" ");
 /**********************************************************************************/
@@ -68,6 +68,14 @@ VCMDtempo = function (index, arg1) {
     trace("[" + index + "] Tempo, " + arg1 + " (" + Math.round(arg1 / 0.4) + " BPM)");
 }
 
+VCMDsetADSR = function (index, arg1, arg2) {
+    var adsr1 = arg1 % 16;
+    var adsr2 = Math.floor(arg1 / 16);
+    var adsr3 = Math.floor(arg2 / 32);
+    var adsr4 = arg2 % 32;
+    trace("[" + index + "] ADSR, Param: " + adsr1 + ", " + adsr2 + ", " + adsr3 + ", " + adsr4);
+}
+
 VCMDlocalVolume = function (index, arg1, arg2) {
     trace("[" + index + "] Local Volume, arg1 (Unused?): " + arg1 + ", Volume: " + arg2 + " (" + (Math.round(arg1 / 256 * 10000) / 100) + "%)");
 }
@@ -102,16 +110,28 @@ VCMDaltNote = function (index, arg1, arg2) {
     trace("[" + index + "] Note " + shownote(arg1) + " (Length 2), Length: " + arg2 + " ticks");
 }
 
-VCMDunknown = function (index, l) {
-    trace("[" + index + "] Unknown Command (Length " + l + ")");
-}
-
 VCMDloopStart = function (index) {
     trace("[" + index + "] Loop Start");
 }
 
 VCMDloopBreak = function (index, arg1) {
     trace("[" + index + "] Loop Break, " + arg1 + " times");
+}
+
+VCMDunknown1 = function (index, arg0) {
+    trace("[" + index + "] Unknown Command (" + arg0.toString(16) + ")");
+}
+
+VCMDunknown2 = function (index, arg0, arg1) {
+    trace("[" + index + "] Unknown Command (" + arg0.toString(16) + ", " + arg1.toString(16) + ")");
+}
+
+VCMDunknown3 = function (index, arg0, arg1, arg2) {
+    trace("[" + index + "] Unknown Command (" + arg0.toString(16) + ", " + arg1.toString(16) + ", " + arg2.toString(16) + ")");
+}
+
+VCMDunknown4 = function (index, arg0, arg1, arg2, arg3) {
+    trace("[" + index + "] Unknown Command (" + arg0.toString(16) + ", " + arg1.toString(16) + ", " + arg2.toString(16) + ", " + arg3.toString(16) + ")");
 }
 
 for (i = 0; i < 8; i++) {
@@ -141,7 +161,7 @@ for (j = 0; j < 8; j++) {
                     i += 2;
                     break;
                 case 0xE2:                    // 
-                    VCMDunknown(i, 2);
+                    VCMDunknown3(i, chunk[i], chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xE3:                    // VIBRATO
@@ -149,7 +169,7 @@ for (j = 0; j < 8; j++) {
                     i += 3;
                     break;
                 case 0xE4:                    // 
-                    VCMDunknown(i, 0);
+                    VCMDunknown1(i, chunk[i]);
                     i += 1;
                     break;
                 case 0xE5:                    // GLOBAL VOL
@@ -157,7 +177,7 @@ for (j = 0; j < 8; j++) {
                     i += 2;
                     break;
                 case 0xE6:                    // 
-                    VCMDunknown(i, 2);
+                    VCMDunknown3(i, chunk[i], chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xE7:                    // TEMPO
@@ -165,23 +185,23 @@ for (j = 0; j < 8; j++) {
                     i += 2;
                     break;
                 case 0xE8:                    // 
-                    VCMDunknown(i, 2);
+                    VCMDunknown3(i, chunk[i], chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xE9:                    // 
-                    VCMDunknown(i, 1);
+                    VCMDunknown2(i, chunk[i], chunk[i + 1]);
                     i += 2;
                     break;
                 case 0xEA:                    // 
-                    VCMDunknown(i, 1);
+                    VCMDunknown2(i, chunk[i], chunk[i + 1]);
                     i += 2;
                     break;
-                case 0xEB:                    // 
-                    VCMDunknown(i, 2);
+                case 0xEB:                    // SET ADSR
+                    VCMDsetADSR(i, chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xEC:                    // 
-                    VCMDunknown(i, 2);
+                    VCMDunknown3(i, chunk[i], chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xED:                    // LOCAL VOLUME
@@ -189,11 +209,11 @@ for (j = 0; j < 8; j++) {
                     i += 3;
                     break;
                 case 0xEE:                    // 
-                    VCMDunknown(i, 2);
+                    VCMDunknown3(i, chunk[i], chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xEF:                    // 
-                    VCMDunknown(i, 0);
+                    VCMDunknown1(i, chunk[i]);
                     i += 1;
                     break;
                 case 0xF0:                    // PORTAMENTO
@@ -209,7 +229,7 @@ for (j = 0; j < 8; j++) {
                     i += 2;
                     break;
                 case 0xF3:                    // 
-                    VCMDunknown(i, 3);
+                    VCMDunknown4(i, chunk[i], chunk[i + 1], chunk[i + 2], chunk[i + 3]);
                     i += 4;
                     break;
                 case 0xF4:                    // RATE BEFORE NOTE CUT
@@ -217,19 +237,19 @@ for (j = 0; j < 8; j++) {
                     i += 3;
                     break;
                 case 0xF5:                    // 
-                    VCMDunknown(i, 0);
+                    VCMDunknown1(i, chunk[i]);
                     i += 1;
                     break;
                 case 0xF6:                    // 
-                    VCMDunknown(i, 0);
+                    VCMDunknown1(i, chunk[i]);
                     i += 1;
                     break;
                 case 0xF7:                    // 
-                    VCMDunknown(i, 0);
+                    VCMDunknown1(i, chunk[i]);
                     i += 1;
                     break;
                 case 0xF8:                    // 
-                    VCMDunknown(i, 0);
+                    VCMDunknown1(i, chunk[i]);
                     i += 1;
                     break;
                 case 0xF9:                    // SLUR NOTE
@@ -249,7 +269,7 @@ for (j = 0; j < 8; j++) {
                     isEnd = true;
                     break;
                 case 0xFD:                    // 
-                    VCMDunknown(i, 2);
+                    VCMDunknown2(i, chunk[i], chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xFE:                    // LOOP STOP
