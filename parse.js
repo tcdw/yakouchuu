@@ -9,6 +9,8 @@ var note = "C C# D D# E F F# G G# A A# B".split(" ");
 var se = entryAddr + 256;
 var channelAddr = [];
 var results = "";
+var transpose1 = 0;
+var transpose2 = 0;
 
 trace = function (info) {
     results += info + "\r\n";
@@ -23,8 +25,9 @@ shownote = function (n) {
     } else if (n == 0x55) {
         return "Rest";
     } else {
-        octave = Math.ceil(n / 12);
-        musicNote = n % 12;
+        n0 = n + transpose1 + transpose2;
+        octave = Math.ceil(n0 / 12);
+        musicNote = n0 % 12;
         return note[musicNote] + "" + octave;
     }
 }
@@ -66,6 +69,11 @@ VCMDglobalVolume = function (index, arg1) {
 
 VCMDtempo = function (index, arg1) {
     trace("[" + index + "] Tempo, " + arg1 + " (" + Math.round(arg1 / 0.4) + " BPM)");
+}
+
+VCMDglobalTranspose = function (index, arg1) {
+    transpose1 = (arg1 > 127) ? (arg1 - 256) : arg1;
+    trace("[" + index + "] Global Transpose, " + transpose1);
 }
 
 VCMDsetADSR = function (index, arg1, arg2) {
@@ -188,8 +196,8 @@ for (j = 0; j < 8; j++) {
                     VCMDunknown3(i, chunk[i], chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
-                case 0xE9:                    // 
-                    VCMDunknown2(i, chunk[i], chunk[i + 1]);
+                case 0xE9:                    // SET GLOBAL TRANSPOSE
+                    VCMDglobalTranspose(i, chunk[i+1]);
                     i += 2;
                     break;
                 case 0xEA:                    // 

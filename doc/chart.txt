@@ -40,11 +40,11 @@ $E7 $XX		; TEMPO ($XX)
 
 $E8 $XX $YY
 
-$E9 $XX
+$E9 $XX		; GLOBAL TRANSPOSE ($XX)
 
 $EA $XX
 
-$EB $XX $YY
+$EB $DA $SR	; ADSR ($DA without +$80, $SR)
 
 $EC $XX $YY
 
