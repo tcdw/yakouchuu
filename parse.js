@@ -60,6 +60,14 @@ VCMDvibrato = function (index, arg1, arg2) {
     trace("[" + index + "] Vibrato, Delay " + delay + ", Rate " + rate + ", Depth " + depth);
 }
 
+VCMDglobalVolume = function (index, arg1) {
+    trace("[" + index + "] Global Volume, " + arg1 + " (" + (Math.round(arg1 / 256 * 10000) / 100) + "%)");
+}
+
+VCMDtempo = function (index, arg1) {
+    trace("[" + index + "] Tempo, " + arg1 + " (" + Math.round(arg1 / 0.4) + " BPM)");
+}
+
 VCMDunknown = function (index, l) {
     trace("[" + index + "] Unknown Command (Length " + l + ")");
 }
@@ -103,7 +111,7 @@ for (j = 0; j < 8; j++) {
                     i += 1;
                     break;
                 case 0xE5:                    // GLOBAL VOL
-                    VCMDunknown(i, 1);
+                    VCMDglobalVolume(i, chunk[i + 1]);
                     i += 2;
                     break;
                 case 0xE6:                    // 
@@ -111,7 +119,7 @@ for (j = 0; j < 8; j++) {
                     i += 3;
                     break;
                 case 0xE7:                    // TEMPO
-                    VCMDunknown(i, 1);
+                    VCMDtempo(i, chunk[i + 1]);
                     i += 2;
                     break;
                 case 0xE8:                    // 
