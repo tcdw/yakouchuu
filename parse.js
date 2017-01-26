@@ -14,6 +14,9 @@ trace = function (info) {
     results += info + "\r\n";
     console.log(info);
 }
+
+/********************************** VCMD Handler **********************************/
+
 shownote = function (n) {
     if (n == 0x56) {
         return "Tie";
@@ -25,9 +28,11 @@ shownote = function (n) {
         return note[musicNote] + "" + octave;
     }
 }
+
 VCMDsetInstrument = function (index, inst) {
-    trace("[" + index + "] Set Instrument, Patch " + inst);
+    trace("[" + index + "] Instrument, Patch " + inst);
 }
+
 VCMDpanpot = function (index, pan) {
     var reserveL = false;
     var reserveR = false;
@@ -47,6 +52,14 @@ VCMDpanpot = function (index, pan) {
     }
     trace("[" + index + "] Panpot, Balance " + (pan2 - 10) + (reserveL ? ", Reserved L" : "") + (reserveR ? ", Reserved R" : ""));
 }
+
+VCMDvibrato = function (index, arg1, arg2) {
+    var delay = Math.floor(arg1 / 16);
+    var rate = arg1 % 16;
+    var depth = arg2;
+    trace("[" + index + "] Vibrato, Delay " + delay + ", Rate " + rate + ", Depth " + depth);
+}
+
 VCMDunknown = function (index, l) {
     trace("[" + index + "] Unknown Command (Length " + l + ")");
 }
@@ -70,11 +83,11 @@ for (j = 0; j < 8; j++) {
             } else if (chunk[i] >= 0xE0 && chunk[i] <= 0xFF) {
                 switch (chunk[i]) {
                 case 0xE0:                    // SET INSTRUMENT
-                    VCMDsetInstrument(i, chunk[i+1]);
+                    VCMDsetInstrument(i, chunk[i + 1]);
                     i += 2;
                     break;
                 case 0xE1:                    // PANPOT
-                    VCMDpanpot(i, chunk[i+1]);
+                    VCMDpanpot(i, chunk[i + 1]);
                     i += 2;
                     break;
                 case 0xE2:                    // 
@@ -82,7 +95,7 @@ for (j = 0; j < 8; j++) {
                     i += 3;
                     break;
                 case 0xE3:                    // VIBRATO
-                    VCMDunknown(i, 2);
+                    VCMDvibrato(i, chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xE4:                    // 
