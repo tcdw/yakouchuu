@@ -12,6 +12,7 @@ var results = "";
 
 trace = function (info) {
     results += info + "\r\n";
+    console.log(info);
 }
 shownote = function (n) {
     if (n == 0x56) {
@@ -25,7 +26,7 @@ shownote = function (n) {
     }
 }
 VCMDsetInstrument = function (index, inst) {
-    trace("[" + index + "] Set Instrument (ID " + inst + ")");
+    trace("[" + index + "] Set Instrument, Patch " + inst);
 }
 VCMDpanpot = function (index, pan) {
     var reserveL = false;
@@ -44,7 +45,7 @@ VCMDpanpot = function (index, pan) {
     } else {
         pan2 = pan;
     }
-    trace("[" + index + "] Panpot (Balance " + (pan2 - 10) + ")");
+    trace("[" + index + "] Panpot, Balance " + (pan2 - 10) + (reserveL ? ", Reserved L" : "") + (reserveR ? ", Reserved R" : ""));
 }
 VCMDunknown = function (index, l) {
     trace("[" + index + "] Unknown Command (Length " + l + ")");
