@@ -90,8 +90,28 @@ VCMDechoEnabled = function (index, arg1) {
     trace("[" + index + "] Echo Enabled, %" + echo);
 }
 
+VCMDcutLength = function (index, arg1, arg2) {
+    trace("[" + index + "] Rate before note cut, Length 1: " + arg2 + ", Length 2: " + arg1);
+}
+
+VCMDslurNote = function (index, arg1, arg2) {
+    trace("[" + index + "] Note " + shownote(arg1) + " (Slured), Length: " + arg2 + " ticks");
+}
+
+VCMDaltNote = function (index, arg1, arg2) {
+    trace("[" + index + "] Note " + shownote(arg1) + " (Length 2), Length: " + arg2 + " ticks");
+}
+
 VCMDunknown = function (index, l) {
     trace("[" + index + "] Unknown Command (Length " + l + ")");
+}
+
+VCMDloopStart = function (index) {
+    trace("[" + index + "] Loop Start");
+}
+
+VCMDloopBreak = function (index, arg1) {
+    trace("[" + index + "] Loop Break, " + arg1 + " times");
 }
 
 for (i = 0; i < 8; i++) {
@@ -193,7 +213,7 @@ for (j = 0; j < 8; j++) {
                     i += 4;
                     break;
                 case 0xF4:                    // RATE BEFORE NOTE CUT
-                    VCMDunknown(i, 2);
+                    VCMDcutLength(i, chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xF5:                    // 
@@ -213,15 +233,15 @@ for (j = 0; j < 8; j++) {
                     i += 1;
                     break;
                 case 0xF9:                    // SLUR NOTE
-                    VCMDunknown(i, 2);
+                    VCMDslurNote(i, chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xFA:                    // NOTE USING ALT CUT RATE
-                    VCMDunknown(i, 2);
+                    VCMDaltNote(i, chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xFB:                    // LOOP START
-                    VCMDunknown(i, 0);
+                    VCMDloopStart(i);
                     i += 1;
                     break;
                 case 0xFC:                    // JUMP
@@ -233,7 +253,7 @@ for (j = 0; j < 8; j++) {
                     i += 3;
                     break;
                 case 0xFE:                    // LOOP STOP
-                    VCMDunknown(i, 1);
+                    VCMDloopBreak(i, chunk[i + 1]);
                     i += 2;
                     break;
                 case 0xFF:                    // TRACE STOP
