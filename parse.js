@@ -28,14 +28,17 @@ smwl = function (info) {
 
 shownote = function (n) {
     if (n == 0x56) {
+        smwl("^");
         return "Tie";
+
     } else if (n == 0x55) {
+        smwl("r");
         return "Rest";
     } else {
         n0 = n + transpose1 + transpose2;
         octave = Math.ceil(n0 / 12);
         musicNote = n0 % 12;
-        var diff = musicNote - smwOctave;
+        var diff = octave - smwOctave;
         if (diff < 0) {
             for (k = 0; k < (0 - diff); k++) {
                 smwl("< ");
@@ -46,6 +49,7 @@ shownote = function (n) {
             }
         } else {
         }
+        smwOctave = octave;
         smwl(smwNote[musicNote]);
         return note[musicNote] + "" + octave;
     }
@@ -84,10 +88,12 @@ VCMDvibrato = function (index, arg1, arg2) {
 
 VCMDglobalVolume = function (index, arg1) {
     trace("[" + index + "] Global Volume, " + arg1 + " (" + (Math.round(arg1 / 256 * 10000) / 100) + "%)");
+    smwl("w" + arg1 + "\r\n");
 }
 
 VCMDtempo = function (index, arg1) {
     trace("[" + index + "] Tempo, " + arg1 + " (" + Math.round(arg1 / 0.4) + " BPM)");
+    smwl("t" + arg1 + "\r\n");
 }
 
 VCMDglobalTranspose = function (index, arg1) {
@@ -104,7 +110,8 @@ VCMDsetADSR = function (index, arg1, arg2) {
 }
 
 VCMDlocalVolume = function (index, arg1, arg2) {
-    trace("[" + index + "] Local Volume, arg1 (Unused?): " + arg1 + ", Volume: " + arg2 + " (" + (Math.round(arg1 / 256 * 10000) / 100) + "%)");
+    trace("[" + index + "] Local Volume, arg1 (Unused?): " + arg1 + ", Volume: " + arg2 + " (" + (Math.round(arg2 / 256 * 10000) / 100) + "%)");
+    smwl("v" + arg2 + "\r\n");
 }
 
 VCMDportamento = function (index, arg1, arg2) {
@@ -131,18 +138,30 @@ VCMDcutLength = function (index, arg1, arg2) {
 
 VCMDslurNote = function (index, arg1, arg2) {
     trace("[" + index + "] Note " + shownote(arg1) + " (Slured), Length: " + arg2 + " ticks");
+    if ((192 % arg2) == 0) {
+        smwl(192 / arg2 + "    ; SLURED!\r\n");
+    } else {
+        smwl("=" + arg2 + "    ; SLURED!\r\n");
+    }
 }
 
 VCMDaltNote = function (index, arg1, arg2) {
     trace("[" + index + "] Note " + shownote(arg1) + " (Length 2), Length: " + arg2 + " ticks");
+    if ((192 % arg2) == 0) {
+        smwl(192 / arg2 + "    ; ALT LENGTH!\r\n");
+    } else {
+        smwl("=" + arg2 + "    ; ALT LENGTH!\r\n");
+    }
 }
 
 VCMDloopStart = function (index) {
     trace("[" + index + "] Loop Start");
+    smwl("[\r\n");
 }
 
 VCMDloopBreak = function (index, arg1) {
     trace("[" + index + "] Loop Break, " + arg1 + " times");
+    smwl("]" + arg1 + "\r\n");
 }
 
 VCMDunknown1 = function (index, arg0) {
@@ -172,8 +191,9 @@ for (j = 0; j < 8; j++) {
     trace("");
     var i = channelAddr[j];
     var isEnd = false;
+    var smwOctave = 4;
     if (i != 0) {
-        smwl("\r\n#" + j + "\r\n");
+        smwl("\r\n#" + j + " o4\r\n");
         while (!isEnd) {
             if (chunk[i] <= 0x56) {
                trace("[" + i + "] Note " + shownote(chunk[i]) + ", Length: " + chunk[i + 1] + " ticks");
