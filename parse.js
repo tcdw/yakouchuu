@@ -50,14 +50,14 @@ VCMDpanpot = function (index, pan) {
     } else {
         pan2 = pan;
     }
-    trace("[" + index + "] Panpot, Balance " + (pan2 - 10) + (reserveL ? ", Reserved L" : "") + (reserveR ? ", Reserved R" : ""));
+    trace("[" + index + "] Panpot, Balance: " + (pan2 - 10) + (reserveL ? ", Reserved L" : "") + (reserveR ? ", Reserved R" : ""));
 }
 
 VCMDvibrato = function (index, arg1, arg2) {
     var delay = Math.floor(arg1 / 16);
     var rate = arg1 % 16;
     var depth = arg2;
-    trace("[" + index + "] Vibrato, Delay " + delay + ", Rate " + rate + ", Depth " + depth);
+    trace("[" + index + "] Vibrato, Delay: " + delay + " ticks, Rate: " + rate + ", Depth: " + depth);
 }
 
 VCMDglobalVolume = function (index, arg1) {
@@ -70,6 +70,24 @@ VCMDtempo = function (index, arg1) {
 
 VCMDlocalVolume = function (index, arg1, arg2) {
     trace("[" + index + "] Local Volume, arg1 (Unused?): " + arg1 + ", Volume: " + arg2 + " (" + (Math.round(arg1 / 256 * 10000) / 100) + "%)");
+}
+
+VCMDportamento = function (index, arg1, arg2) {
+    trace("[" + index + "] Portamento, Delay: " + arg1 + " ticks, Speed: " + arg2);
+}
+
+VCMDechoVolume = function (index, arg1, arg2) {
+    var left  = (arg1 > 127) ? (arg1 - 256) : arg1;
+    var right = (arg2 > 127) ? (arg2 - 256) : arg2;
+    trace("[" + index + "] Echo Volume, L: " + left + ", R: " + right);
+}
+
+VCMDechoEnabled = function (index, arg1) {
+    var echo = arg1.toString(2);
+    while (echo.length < 8) {
+        echo = "0" + echo;
+    }
+    trace("[" + index + "] Echo Enabled, %" + echo);
 }
 
 VCMDunknown = function (index, l) {
@@ -90,7 +108,7 @@ for (j = 0; j < 8; j++) {
     if (i != 0) {
         while (!isEnd) {
             if (chunk[i] <= 0x56) {
-               trace("[" + i + "] Note " + shownote(chunk[i]) + ", Length " + chunk[i + 1]);
+               trace("[" + i + "] Note " + shownote(chunk[i]) + ", Length: " + chunk[i + 1] + " ticks");
                i += 2;
             } else if (chunk[i] >= 0xE0 && chunk[i] <= 0xFF) {
                 switch (chunk[i]) {
@@ -159,15 +177,15 @@ for (j = 0; j < 8; j++) {
                     i += 1;
                     break;
                 case 0xF0:                    // PORTAMENTO
-                    VCMDunknown(i, 2);
+                    VCMDportamento(i, chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xF1:                    // ECHO VOL
-                    VCMDunknown(i, 2);
+                    VCMDechoVolume(i, chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xF2:                    // ECHO ENABLED
-                    VCMDunknown(i, 1);
+                    VCMDechoEnabled(i, chunk[i + 1]);
                     i += 2;
                     break;
                 case 0xF3:                    // 
