@@ -1,7 +1,7 @@
 #!/usr/bin/env nodejs
 
 var fs = require('fs');
-var chunk = fs.readFileSync("ykc-b06.spc");
+var chunk = fs.readFileSync("ykc-b06.spc"); // zna-25 ykc-b06
 var entryAddr = 0x1CAB;
 var note = "C C# D D# E F F# G G# A A# B".split(" ");
 /**********************************************************************************/
@@ -68,12 +68,16 @@ VCMDtempo = function (index, arg1) {
     trace("[" + index + "] Tempo, " + arg1 + " (" + Math.round(arg1 / 0.4) + " BPM)");
 }
 
+VCMDlocalVolume = function (index, arg1, arg2) {
+    trace("[" + index + "] Local Volume, arg1 (Unused?): " + arg1 + ", Volume: " + arg2 + " (" + (Math.round(arg1 / 256 * 10000) / 100) + "%)");
+}
+
 VCMDunknown = function (index, l) {
     trace("[" + index + "] Unknown Command (Length " + l + ")");
 }
 
 for (i = 0; i < 8; i++) {
-    channelAddr[i] = chunk.readUInt16LE(se + i * 2);
+    channelAddr[i] = chunk.readUInt16LE(se + i * 2) + 256;
     trace("Channel " + i + " Entry: " + channelAddr[i]);
 }
 
@@ -81,7 +85,7 @@ for (j = 0; j < 8; j++) {
     trace("");
     trace("[ ================ Channel " + j + " ================ ]");
     trace("");
-    var i = channelAddr[j] + 256;
+    var i = channelAddr[j];
     var isEnd = false;
     if (i != 0) {
         while (!isEnd) {
@@ -143,7 +147,7 @@ for (j = 0; j < 8; j++) {
                     i += 3;
                     break;
                 case 0xED:                    // LOCAL VOLUME
-                    VCMDunknown(i, 2);
+                    VCMDlocalVolume(i, chunk[i + 1], chunk[i + 2]);
                     i += 3;
                     break;
                 case 0xEE:                    // 
@@ -203,7 +207,7 @@ for (j = 0; j < 8; j++) {
                     i += 1;
                     break;
                 case 0xFC:                    // JUMP
-                    trace("[" + i + "] Jump into " + chunk.readUInt16LE(i + 1));
+                    trace("[" + i + "] Jump into " + (chunk.readUInt16LE(i + 1) + 256));
                     isEnd = true;
                     break;
                 case 0xFD:                    // 
