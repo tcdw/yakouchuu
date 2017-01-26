@@ -37,11 +37,11 @@ shownote = function (n) {
         musicNote = n0 % 12;
         var diff = musicNote - smwOctave;
         if (diff < 0) {
-            for (i = 0; i < (0 - diff); i++) {
+            for (k = 0; k < (0 - diff); k++) {
                 smwl("< ");
             }
         } else if (diff > 0) {
-            for (i = 0; i < diff; i++) {
+            for (k = 0; k < diff; k++) {
                 smwl("> ");
             }
         } else {
@@ -173,7 +173,7 @@ for (j = 0; j < 8; j++) {
     var i = channelAddr[j];
     var isEnd = false;
     if (i != 0) {
-        smwl("#" + j + "\r\n");
+        smwl("\r\n#" + j + "\r\n");
         while (!isEnd) {
             if (chunk[i] <= 0x56) {
                trace("[" + i + "] Note " + shownote(chunk[i]) + ", Length: " + chunk[i + 1] + " ticks");
@@ -321,5 +321,7 @@ for (j = 0; j < 8; j++) {
         }
     }
 }
-
+if (smw) {
+    fs.writeFileSync("results_smw.txt", smwlog);
+}
 fs.writeFileSync("results.txt", results);
