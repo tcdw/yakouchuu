@@ -3,3 +3,5 @@ results_smw.txt
 *.spc
 *.bat
 *.sh
+.DS_Store
+node_modules
