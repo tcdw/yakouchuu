@@ -1,6 +1,7 @@
 results.txt
 results_smw.txt
 *.spc
+*.spc.json
 *.bat
 *.sh
 .DS_Store

@@ -12,3 +12,4 @@ const entryPtr = typeof argv.entryptr === 'undefined' ? 0x1C00 : Number(argv.ent
 const spcPath = path.resolve(process.cwd(), argv._[0]);
 const spc = fs.readFileSync(spcPath);
 const ast = parser(spc, entryPtr);
+fs.writeJSONSync(`${spcPath}.json`, ast, { encoding: 'utf8', spaces: 2 });
