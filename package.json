@@ -23,5 +23,9 @@
     "eslint": "^5.15.1",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0"
+  },
+  "dependencies": {
+    "fs-extra": "^8.0.1",
+    "minimist": "^1.2.0"
   }
 }

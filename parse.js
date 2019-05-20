@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 
-const chunk = fs.readFileSync('ykc-08.spc');
+const chunk = fs.readFileSync('zna-17.spc');
 const entryAddr = 0x1CAB;
 const note = 'C C# D D# E F F# G G# A A# B'.split(' ');
 const smw = true;
@@ -12,6 +12,7 @@ const smwNote = 'c c+ d d+ e f f+ g g+ a a+ b'.split(' ');
 
 const se = entryAddr + 256;
 const channelAddr = [];
+const instUsed = [];
 let results = '';
 let transpose1 = 0;
 const transpose2 = 0;
@@ -56,6 +57,9 @@ const shownote = (n) => {
 const VCMDsetInstrument = (index, inst) => {
     trace(`[${index}] Instrument, Patch ${inst}`);
     smwl(`PATCH${inst} `);
+    if (instUsed.indexOf(inst) < 0) {
+        instUsed.push(inst);
+    }
 };
 
 const VCMDpanpot = (index, pan) => {
@@ -348,6 +352,7 @@ for (let j = 0; j < 8; j += 1) {
     }
 }
 if (smw) {
+    console.log(instUsed.join("\n"));
     fs.writeFileSync('results_smw.txt', smwlog);
 }
 fs.writeFileSync('results.txt', results);
