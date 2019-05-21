@@ -43,7 +43,7 @@ $E8 $XX $YY
 
 $E9 $XX		; GLOBAL TRANSPOSE ($XX)
 
-$EA $XX
+$EA $XX     ; LOCAL TRANSOPSE ($XX)
 
 $EB $DA $SR	; ADSR ($DA without +$80, $SR)
 
