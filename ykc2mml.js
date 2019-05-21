@@ -4,6 +4,7 @@ const path = require('path');
 const beautify = require('json-beautify');
 const parser = require('./lib/parser');
 const amml = require('./lib/amml');
+const amk = require('./lib/amk');
 
 if (argv._.length < 1 || argv.h || argv.help) {
     console.log('usage: ykc2mml.js spc_file [--entryptr pos] [--doubletick times] [--brrnamemap map_file]');
@@ -15,4 +16,6 @@ const spcPath = path.resolve(process.cwd(), argv._[0]);
 const spc = fs.readFileSync(spcPath);
 const ast = parser(spc, entryPtr);
 const mml = amml(ast, false);
+const finalTxt = amk(mml);
 fs.writeFileSync(`${spcPath}.json`, beautify(ast, null, 2, 80), { encoding: 'utf8' });
+fs.writeFileSync(`${spcPath}.txt`, finalTxt, { encoding: 'utf8' });

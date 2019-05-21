@@ -10,7 +10,8 @@ module.exports = {
         "prefer-destructuring": "off",
         "no-console": "off",
         "no-param-reassign": "off",
-        "no-bitwise": "off"
+        "no-bitwise": "off",
+        "no-continue": "off"
     },
     "env": {
         "browser": true
