@@ -27,6 +27,6 @@
   "dependencies": {
     "fs-extra": "^8.0.1",
     "json-beautify": "^1.1.0",
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.2"
   }
 }
