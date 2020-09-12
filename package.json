@@ -1,14 +1,8 @@
 {
   "name": "yakouchuu-parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tools and documents used for Yakouchuu series SPC Driver.",
-  "main": ".eslintrc.js",
-  "directories": {
-    "doc": "doc"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "main": "ykc2mml.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tcdw/yakouchuu.git"
@@ -20,13 +14,14 @@
   },
   "homepage": "https://github.com/tcdw/yakouchuu#readme",
   "devDependencies": {
-    "eslint": "^5.15.1",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.16.0"
+    "eslint": "^7.8.1",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0"
   },
   "dependencies": {
-    "fs-extra": "^8.0.1",
-    "json-beautify": "^1.1.0",
-    "minimist": "^1.2.3"
-  }
+    "fs-extra": "^9.0.1",
+    "json-beautify": "^1.1.1",
+    "minimist": "^1.2.5"
+  },
+  "preferGlobal": true
 }
