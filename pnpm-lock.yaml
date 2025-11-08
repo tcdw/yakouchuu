@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@types/commander':
-        specifier: ^2.12.5
-        version: 2.12.5
       commander:
         specifier: ^14.0.2
         version: 14.0.2
@@ -110,10 +107,6 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
-
-  '@types/commander@2.12.5':
-    resolution: {integrity: sha512-YXGZ/rz+s57VbzcvEV9fUoXeJlBt5HaKu5iUheiIWNsJs23bz6AnRuRiZBRVBLYyPnixNvVnuzM5pSaxr8Yp/g==}
-    deprecated: This is a stub types definition. commander provides its own type definitions, so you do not need this installed.
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -643,10 +636,6 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
-
-  '@types/commander@2.12.5':
-    dependencies:
-      commander: 14.0.2
 
   '@types/estree@1.0.8': {}
 
