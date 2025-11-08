@@ -1,27 +1,42 @@
 {
   "name": "yakouchuu-parser",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Tools and documents used for Yakouchuu series SPC Driver.",
-  "main": "ykc2mml.js",
+  "author": "tcdw",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tcdw/yakouchuu.git"
   },
-  "author": "tcdw",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/tcdw/yakouchuu/issues"
   },
   "homepage": "https://github.com/tcdw/yakouchuu#readme",
-  "devDependencies": {
-    "eslint": "^7.8.1",
-    "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.22.0"
+  "main": "dist/ykc2mml.js",
+  "bin": {
+    "ykc2mml": "dist/ykc2mml.js"
   },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "prepare": "pnpm run build"
+  },
+  "preferGlobal": true,
   "dependencies": {
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^11.3.2",
     "json-beautify": "^1.1.1",
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.8"
   },
-  "preferGlobal": true
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/minimist": "^1.2.5",
+    "@types/node": "^22.19.0",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
+  },
+  "packageManager": "pnpm@10.20.0"
 }

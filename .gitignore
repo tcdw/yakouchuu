@@ -6,3 +6,4 @@ results_smw.txt
 *.sh
 .DS_Store
 node_modules
+dist

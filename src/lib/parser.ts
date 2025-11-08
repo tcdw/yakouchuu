@@ -1,4 +1,4 @@
-const { trace8, trace16 } = require('./hex_addr');
+import { trace8, trace16 } from './hexAddr';
 
 const o = 0x100;
 const cmdLen = [
@@ -8,14 +8,44 @@ const cmdLen = [
     -1, 2, 2, 0, 2, -1, 1, -1, // F8 - FF
 ];
 
+export interface SequenceCommand {
+    addr: number;
+    d: number[];
+}
+
+export interface PatchData {
+    sample: number;
+    a: number;
+    d: number;
+    s: number;
+    r: number;
+    tuning: number;
+}
+
+export interface ParserResult {
+    echoDelay: number;
+    echoFeedback: number;
+    echoFIR: number;
+    instruments: Patch[];
+    tracks: number[];
+    mentionedAddr: number[];
+    sequences: SequenceCommand[][];
+}
+
 class Patch {
-    /**
-     * @param {number} sample
-     * @param {number} da
-     * @param {number} sr
-     * @param {number} tuning
-     */
-    constructor(sample, da, sr, tuning) {
+    sample: number;
+
+    a: number;
+
+    d: number;
+
+    s: number;
+
+    r: number;
+
+    tuning: number;
+
+    constructor(sample: number, da: number, sr: number, tuning: number) {
         this.sample = sample;
         this.a = da & 0x8F;
         this.d = (da >> 4) & 0x7;
@@ -24,7 +54,7 @@ class Patch {
         this.tuning = tuning;
     }
 
-    toNSPC() {
+    toNSPC(): Buffer {
         const data = Buffer.alloc(6);
         data[0] = this.sample;
         data[1] = this.d * 0x10 + this.a + 0x80;
@@ -35,17 +65,13 @@ class Patch {
     }
 }
 
-/**
- * @param {Buffer} spc
- * @param {number} entryPtr
- */
-function parser(spc, entryPtr) {
+function parser(spc: Buffer, entryPtr: number): ParserResult {
     const detailPtr = spc.readInt16LE(o + entryPtr);
     const echoDelay = spc[o + detailPtr];
     const echoFeedback = spc[o + detailPtr + 1];
     const echoFIR = spc[o + detailPtr + 2];
-    const instruments = [];
-    const mentionedAddr = [];
+    const instruments: Patch[] = [];
+    const mentionedAddr: number[] = [];
     const instBase = o + detailPtr + 3;
     for (let i = 0; i < 0x18; i += 1) {
         const nowBase = instBase + i * 5;
@@ -57,13 +83,13 @@ function parser(spc, entryPtr) {
         ));
     }
     const trackBase = o + entryPtr + 0xAB; // 暂定
-    const tracks = [];
-    const sequences = [];
+    const tracks: number[] = [];
+    const sequences: SequenceCommand[][] = [];
     for (let i = 0; i < 8; i += 1) {
         tracks.push(spc.readInt16LE(trackBase + i * 2) + o);
     }
     for (let i = 0; i < 8; i += 1) {
-        const content = [];
+        const content: SequenceCommand[] = [];
         let cmdPtr = tracks[i];
         let cont = true;
         while (cont && (spc[cmdPtr] !== 0 || cmdPtr < tracks[i + 1])) {
@@ -94,10 +120,10 @@ function parser(spc, entryPtr) {
                     });
                     cmdPtr += curLen + 1;
                 } else {
-                    throw Error(`${trace16(cmdPtr - o)}: Unknown command ${trace8(spc[cmdPtr])}! Manual review required!`);
+                    throw new Error(`${trace16(cmdPtr - o)}: Unknown command ${trace8(spc[cmdPtr])}! Manual review required!`);
                 }
             } else {
-                throw Error(`${trace16(cmdPtr - o)}: Unknown command ${trace8(spc[cmdPtr])}! Manual review required!`);
+                throw new Error(`${trace16(cmdPtr - o)}: Unknown command ${trace8(spc[cmdPtr])}! Manual review required!`);
             }
         }
         sequences[i] = content;
@@ -113,4 +139,4 @@ function parser(spc, entryPtr) {
     };
 }
 
-module.exports = parser;
+export default parser;

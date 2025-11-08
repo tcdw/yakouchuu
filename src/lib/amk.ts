@@ -1,10 +1,21 @@
-const fs = require('fs-extra');
-const path = require('path');
-const crypto = require('crypto');
-const { pad } = require('./hex_addr');
-const printBuffer = require('./print_buffer');
+import path from 'path';
+import crypto from 'crypto';
+import fs from 'fs-extra';
+import { pad } from './hexAddr';
+import printBuffer from './printBuffer';
+import type { ParserResult } from './parser';
+import type { AMMLResult } from './amml';
 
-const getBRR = (chunk, id) => {
+interface BRRInfo {
+    name: string;
+    brr: Buffer;
+}
+
+type BRRMap = Record<number, BRRInfo>;
+
+export type BrrNameMap = Record<string, string>;
+
+const getBRR = (chunk: Buffer, id: number): Buffer => {
     const offset = 0x100;
     const sampleIndexPtr = chunk[0x1015D] * 0x100 + offset;
     const samplePtr = chunk.readUInt16LE(sampleIndexPtr + id * 4);
@@ -23,11 +34,17 @@ const getBRR = (chunk, id) => {
     return brr;
 };
 
-function amk(result, ast, spc, spcPath, brrNameMap) {
+function amk(
+    result: AMMLResult,
+    ast: ParserResult,
+    spc: Buffer,
+    spcPath: string,
+    brrNameMap: BrrNameMap,
+): string {
     const txt = result.channels.join('\n\n');
     const spcName = path.parse(spcPath).name;
-    const brrs = {};
-    const patchOrders = result.patches.sort();
+    const brrs: BRRMap = {};
+    const patchOrders = [...result.patches].sort((a, b) => a - b);
     let mmlStr = '';
     let patterns = '';
     mmlStr += '#amk 2\n';
@@ -83,4 +100,4 @@ function amk(result, ast, spc, spcPath, brrNameMap) {
     return mmlStr + txt;
 }
 
-module.exports = amk;
+export default amk;
