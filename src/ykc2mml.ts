@@ -25,6 +25,7 @@ if (argv._.length < 1 || argv.h || argv.help) {
 
 const entryPtr = typeof argv.entryptr === 'undefined' ? 0x1C00 : Number(argv.entryptr);
 const spcPath = path.resolve(process.cwd(), String(argv._[0]));
+const spcPathParsed = path.parse(spcPath);
 const spc = fs.readFileSync(spcPath);
 const brrNameMap: BrrNameMap = argv.brrnamemap ? fs.readJSONSync(path.resolve(process.cwd(), argv.brrnamemap), { encoding: 'utf8' }) : {};
 const ast = parser(spc, entryPtr);
@@ -32,5 +33,5 @@ const doubleTick = typeof argv.doubletick === 'undefined' ? 1 : Math.floor(Numbe
 const enableSuperLoop = !(argv['disable-superloop']);
 const mml = amml(ast, spc, false, doubleTick, enableSuperLoop);
 const finalTxt = amk(mml, ast, spc, spcPath, brrNameMap);
-fs.writeFileSync(`${spcPath}.json`, beautify(ast, null, 2, 80), { encoding: 'utf8' });
-fs.writeFileSync(`${spcPath}.txt`, finalTxt, { encoding: 'utf8' });
+fs.writeFileSync(path.join(spcPathParsed.dir, `${spcPathParsed.name}.json`), beautify(ast, null, 2, 80), { encoding: 'utf8' });
+fs.writeFileSync(path.join(spcPathParsed.dir, `${spcPathParsed.name}.txt`), finalTxt, { encoding: 'utf8' });

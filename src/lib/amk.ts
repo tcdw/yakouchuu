@@ -42,6 +42,7 @@ function amk(
     brrNameMap: BrrNameMap,
 ): string {
     const txt = result.channels.join('\n\n');
+    const spcOnPath = path.parse(spcPath).dir;
     const spcName = path.parse(spcPath).name;
     const brrs: BRRMap = {};
     const patchOrders = [...result.patches].sort((a, b) => a - b);
@@ -50,7 +51,7 @@ function amk(
     mmlStr += '#amk 2\n';
     mmlStr += `#path "${spcName}"\n`;
     mmlStr += '#samples\n{\n';
-    fs.mkdirpSync(path.resolve(process.cwd(), `${spcName}`));
+    fs.mkdirpSync(path.join(spcOnPath, `${spcName}`));
     patchOrders.forEach((e) => {
         const brr = getBRR(spc, ast.instruments[e].sample);
         const hash = crypto.createHash('sha256');
@@ -62,7 +63,7 @@ function amk(
             brr,
         };
         mmlStr += `\t"${name}.brr"\n`;
-        fs.writeFileSync(path.resolve(process.cwd(), `${spcName}`, `${name}.brr`), brr);
+        fs.writeFileSync(path.join(spcOnPath, `${spcName}`, `${name}.brr`), brr);
     });
 
     mmlStr += '}\n#instruments\n{\n';
@@ -89,14 +90,14 @@ function amk(
     mmlStr += `
 \t#author    "${spcAuthor}"
 \t#game      "${spcGame} / SMW"
-\t#comment   "Ported (${now.getFullYear()}${pad(now.getMonth() + 1, 2)}${pad(now.getDate(), 2)})"
+\t#comment   "Ported by Nanako (${now.getFullYear()}${pad(now.getMonth() + 1, 2)}${pad(now.getDate(), 2)})"
 \t#title     "${spcTitle}"
 }
 `;
     for (let i = 0; i < patchOrders.length; i += 1) {
         mmlStr += `"PATCH${pad(patchOrders[i], 3)}=@${i + 30}"\n`;
     }
-    fs.writeFileSync(path.resolve(process.cwd(), `${spcName}`, '!patterns.txt'), patterns);
+    fs.writeFileSync(path.join(spcOnPath, `${spcName}`, '!patterns.txt'), patterns);
     return mmlStr + txt;
 }
 
