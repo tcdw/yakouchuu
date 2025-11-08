@@ -1,6 +1,6 @@
 import { trace8, trace16, pad } from './hexAddr';
 import printBuffer from './printBuffer';
-import type { ParserResult } from './parser';
+import type { ConversionContext } from './context';
 
 const notes = ['c', 'c+', 'd', 'd+', 'e', 'f', 'f+', 'g', 'g+', 'a', 'a+', 'b'];
 const defaultFIR = [
@@ -17,38 +17,37 @@ export interface AMMLResult {
 
 const toSignedByte = (value: number): number => (value << 24) >> 24;
 
-function amml(
-    ast: ParserResult,
-    spc: Buffer,
-    absTick: boolean,
-    doubleTrick: number,
-    superloop: boolean,
-): AMMLResult {
-    const getNoteLenForMML = (tick: number, division: number): string => {
-        const dotMax = 6;
-        const note = division * 4;
-        let text = '';
-        if (!absTick) {
-            for (let l = 1; l <= note; l += 1) {
-                let cTick = 0;
-                for (let dot = 0; dot <= dotMax; dot += 1) {
-                    const ld = (l << dot);
-                    if (note % ld) {
-                        break;
+const getNoteLenForMML = (tick: number, division: number, absTick: boolean): string => {
+    const dotMax = 6;
+    const note = division * 4;
+    let text = '';
+    if (!absTick) {
+        for (let l = 1; l <= note; l += 1) {
+            let cTick = 0;
+            for (let dot = 0; dot <= dotMax; dot += 1) {
+                const ld = (l << dot);
+                if (note % ld) {
+                    break;
+                }
+                cTick += note / ld;
+                if (tick === cTick) {
+                    text += l;
+                    for (let k = dot; k > 0; k -= 1) {
+                        text += '.';
                     }
-                    cTick += note / ld;
-                    if (tick === cTick) {
-                        text += l;
-                        for (let k = dot; k > 0; k -= 1) {
-                            text += '.';
-                        }
-                        return text;
-                    }
+                    return text;
                 }
             }
         }
-        return `=${tick}`;
-    };
+    }
+    return `=${tick}`;
+};
+
+function amml(context: ConversionContext): void {
+    const { ast, spc, absTick, doubleTick, enableSuperLoop: superloop } = context;
+    if (!ast) {
+        throw new Error('AST not found in context. Run parser first.');
+    }
 
     const channels: string[] = [];
     const patches: number[] = [];
@@ -88,7 +87,7 @@ function amml(
                 const isAlt = item[0] === 0xFA;
                 const off = (isSlur || isAlt) ? 1 : 0;
                 const note = item[off] - 1;
-                let len = (item[off + 1] & 0x7F) * doubleTrick;
+                let len = (item[off + 1] & 0x7F) * doubleTick;
                 const fullLen = len;
                 volumePrev = volumeNow;
                 volumeNow = item[off + 1] >= 0x80 ? volumeA : volumeB;
@@ -133,13 +132,13 @@ function amml(
                     }
                     noteStr += notes[note % 12];
                 }
-                noteStr += getNoteLenForMML(len, 48);
+                noteStr += getNoteLenForMML(len, 48, absTick);
                 chan.push(`${noteStr} `);
                 lastNote = chan.length - 1;
 
                 if (len !== fullLen) {
                     const restLen = fullLen - len;
-                    chan.push(`$F4 $01 ^${getNoteLenForMML(restLen, 48)} `);
+                    chan.push(`$F4 $01 ^${getNoteLenForMML(restLen, 48, absTick)} `);
                 }
                 continue;
             }
@@ -170,7 +169,7 @@ function amml(
                     break;
                 }
                 case 0xE7: {
-                    chan.push(`t${item[1] * doubleTrick} `);
+                    chan.push(`t${item[1] * doubleTick} `);
                     break;
                 }
                 case 0xE9: {
@@ -248,11 +247,8 @@ function amml(
             }
         }
         channels[i] = chan.join('');
-        while (channels[i].indexOf('\n\n') >= 0) {
-            channels[i] = channels[i].split('\n\n').join('\n');
-        }
     }
-    return {
+    context.mml = {
         channels,
         patches,
     };

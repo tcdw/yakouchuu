@@ -3,17 +3,11 @@ import crypto from 'crypto';
 import fs from 'fs-extra';
 import { pad } from './hexAddr';
 import printBuffer from './printBuffer';
-import type { ParserResult } from './parser';
-import type { AMMLResult } from './amml';
+import type { ConversionContext } from './context';
 
-interface BRRInfo {
-    name: string;
-    brr: Buffer;
+export interface BrrNameMap {
+    [key: string]: string;
 }
-
-type BRRMap = Record<number, BRRInfo>;
-
-export type BrrNameMap = Record<string, string>;
 
 const getBRR = (chunk: Buffer, id: number): Buffer => {
     const offset = 0x100;
@@ -34,24 +28,23 @@ const getBRR = (chunk: Buffer, id: number): Buffer => {
     return brr;
 };
 
-function amk(
-    result: AMMLResult,
-    ast: ParserResult,
-    spc: Buffer,
-    spcPath: string,
-    brrNameMap: BrrNameMap,
-): string {
-    const txt = result.channels.join('\n\n');
-    const spcOnPath = path.parse(spcPath).dir;
-    const spcName = path.parse(spcPath).name;
-    const brrs: BRRMap = {};
-    const patchOrders = [...result.patches].sort((a, b) => a - b);
+function amk(context: ConversionContext): void {
+    const { mml, ast, spc, spcPath, brrNameMap } = context;
+    if (!ast || !mml) {
+        throw new Error('AST or MML not found in context. Run parser and amml first.');
+    }
+
+    const final: string[] = [];
+    const spcPathParsed = path.parse(spcPath);
+    const spcName = spcPathParsed.name;
+    const brrs: Record<number, { name: string; brr: Buffer }> = {};
+    const patchOrders = [...mml.patches].sort((a, b) => a - b);
     let mmlStr = '';
     let patterns = '';
     mmlStr += '#amk 2\n';
     mmlStr += `#path "${spcName}"\n`;
     mmlStr += '#samples\n{\n';
-    fs.mkdirpSync(path.join(spcOnPath, `${spcName}`));
+    fs.mkdirpSync(path.join(spcPathParsed.dir, `${spcName}`));
     patchOrders.forEach((e) => {
         const brr = getBRR(spc, ast.instruments[e].sample);
         const hash = crypto.createHash('sha256');
@@ -63,7 +56,7 @@ function amk(
             brr,
         };
         mmlStr += `\t"${name}.brr"\n`;
-        fs.writeFileSync(path.join(spcOnPath, `${spcName}`, `${name}.brr`), brr);
+        fs.writeFileSync(path.join(spcPathParsed.dir, `${spcName}`, `${name}.brr`), brr);
     });
 
     mmlStr += '}\n#instruments\n{\n';
@@ -97,8 +90,11 @@ function amk(
     for (let i = 0; i < patchOrders.length; i += 1) {
         mmlStr += `"PATCH${pad(patchOrders[i], 3)}=@${i + 30}"\n`;
     }
-    fs.writeFileSync(path.join(spcOnPath, `${spcName}`, '!patterns.txt'), patterns);
-    return mmlStr + txt;
+    fs.writeFileSync(path.join(spcPathParsed.dir, `${spcName}`, '!patterns.txt'), patterns);
+    for (let i = 0; i < mml.channels.length; i += 1) {
+        final.push(`#${i}\n${mml.channels[i]}`);
+    }
+    context.finalTxt = final.join('\n');
 }
 
 export default amk;

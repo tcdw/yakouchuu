@@ -1,4 +1,5 @@
 import { trace8, trace16 } from './hexAddr';
+import type { ConversionContext } from './context';
 
 const o = 0x100;
 const cmdLen = [
@@ -65,7 +66,8 @@ class Patch {
     }
 }
 
-function parser(spc: Buffer, entryPtr: number): ParserResult {
+function parser(context: ConversionContext): void {
+    const { spc, entryPtr } = context;
     const detailPtr = spc.readInt16LE(o + entryPtr);
     const echoDelay = spc[o + detailPtr];
     const echoFeedback = spc[o + detailPtr + 1];
@@ -128,7 +130,7 @@ function parser(spc: Buffer, entryPtr: number): ParserResult {
         }
         sequences[i] = content;
     }
-    return {
+    context.ast = {
         echoDelay,
         echoFIR,
         echoFeedback,

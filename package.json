@@ -26,6 +26,8 @@
   },
   "preferGlobal": true,
   "dependencies": {
+    "@types/commander": "^2.12.5",
+    "commander": "^14.0.2",
     "fs-extra": "^11.3.2",
     "json-beautify": "^1.1.1",
     "minimist": "^1.2.8"

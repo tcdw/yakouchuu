@@ -1,37 +1,31 @@
 #!/usr/bin/env node
-import minimist from 'minimist';
-import fs from 'fs-extra';
-import path from 'path';
-import beautify from 'json-beautify';
-import parser from './lib/parser';
-import amml from './lib/amml';
-import amk, { type BrrNameMap } from './lib/amk';
+import { Command } from 'commander';
+import { convert } from './core';
 
-interface CLIArgs extends minimist.ParsedArgs {
-    entryptr?: number | string;
-    doubletick?: number | string;
-    brrnamemap?: string;
-    h?: boolean;
-    help?: boolean;
-    ['disable-superloop']?: boolean;
-}
+const program = new Command();
 
-const argv = minimist<CLIArgs>(process.argv.slice(2));
+program
+  .name('ykc2mml')
+  .description('Converts Yakouchuu SPC files to MML.')
+  .version('1.0.0');
 
-if (argv._.length < 1 || argv.h || argv.help) {
-    console.log('usage: ykc2mml.js spc_file [--entryptr pos] [--doubletick times] [--disable-superloop] [--brrnamemap map_file]');
-    process.exit(1);
-}
+program
+  .argument('<spc_file>', 'Path to the SPC file')
+  .option('--entryptr <pos>', 'Entry pointer position', '0x1C00')
+  .option('--doubletick <times>', 'Double tick times', '1')
+  .option('--disable-superloop', 'Disable superloop')
+  .option('--brrnamemap <map_file>', 'Path to the BRR name map file')
+  .action((spcFile, options) => {
+    const entryPtr = parseInt(options.entryptr, 16);
+    const doubleTick = parseInt(options.doubletick, 10);
+    const enableSuperLoop = !options.disableSuperloop;
 
-const entryPtr = typeof argv.entryptr === 'undefined' ? 0x1C00 : Number(argv.entryptr);
-const spcPath = path.resolve(process.cwd(), String(argv._[0]));
-const spcPathParsed = path.parse(spcPath);
-const spc = fs.readFileSync(spcPath);
-const brrNameMap: BrrNameMap = argv.brrnamemap ? fs.readJSONSync(path.resolve(process.cwd(), argv.brrnamemap), { encoding: 'utf8' }) : {};
-const ast = parser(spc, entryPtr);
-const doubleTick = typeof argv.doubletick === 'undefined' ? 1 : Math.floor(Number(argv.doubletick));
-const enableSuperLoop = !(argv['disable-superloop']);
-const mml = amml(ast, spc, false, doubleTick, enableSuperLoop);
-const finalTxt = amk(mml, ast, spc, spcPath, brrNameMap);
-fs.writeFileSync(path.join(spcPathParsed.dir, `${spcPathParsed.name}.json`), beautify(ast, null, 2, 80), { encoding: 'utf8' });
-fs.writeFileSync(path.join(spcPathParsed.dir, `${spcPathParsed.name}.txt`), finalTxt, { encoding: 'utf8' });
+    convert(spcFile, {
+      entryPtr,
+      doubleTick,
+      enableSuperLoop,
+      brrNameMapFile: options.brrnamemap,
+    });
+  });
+
+program.parse(process.argv);
